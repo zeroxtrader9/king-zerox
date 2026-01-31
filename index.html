@@ -1,36 +1,110 @@
-<div class="container">
-    <h1>🐲 ZEROX AI 🐯</h1>
-    
-    <div style="margin-bottom: 20px;">
-        <input type="text" id="bulkInput" placeholder="Sari history paste karein (e.g. DDTDT)" 
-               style="width: 80%; padding: 10px; border-radius: 5px; border: none;">
-        <button onclick="importData()" style="background: #2ecc71; color: white;">IMPORT</button>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEROX AI - ADVANCE ANALYTICS 2026</title>
+    <style>
+        :root { --gold: #f1c40f; --bg: #050505; --card: #121212; --drg: #ff4d4d; --tgr: #1e90ff; }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', Arial, sans-serif; text-align: center; margin: 0; padding: 15px; }
+        .app-container { max-width: 500px; margin: auto; background: var(--card); border: 2px solid var(--gold); border-radius: 25px; padding: 20px; box-shadow: 0 0 40px rgba(241, 196, 15, 0.15); }
+        .status-bar { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        #prediction { font-size: 50px; font-weight: 900; margin: 25px 0; text-transform: uppercase; transition: transform 0.2s; }
+        input { width: 90%; padding: 15px; background: #000; border: 1px solid #444; color: var(--gold); font-size: 22px; border-radius: 12px; text-align: center; outline: none; margin-bottom: 20px; }
+        .logic-label { background: #222; padding: 8px; border-radius: 5px; font-size: 13px; color: #f1c40f; display: inline-block; margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .stat-item { background: #1a1a1a; padding: 10px; border-radius: 10px; border: 1px solid #333; }
+        .stat-item span { display: block; font-size: 10px; color: #777; }
+        .dragon-text { color: var(--drg); text-shadow: 0 0 10px rgba(255, 77, 77, 0.5); }
+        .tiger-text { color: var(--tgr); text-shadow: 0 0 10px rgba(30, 144, 255, 0.5); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="status-bar">
+        <span>PROJECT: ZEROX AI v2.0</span>
+        <span>STATUS: SYSTEM READY</span>
     </div>
 
-    <div class="input-section">
-        <button class="btn-dragon" onclick="addResult('D')">D</button>
-        <button class="btn-tiger" onclick="addResult('T')">T</button>
+    <h1 style="color: var(--gold); margin: 0; font-size: 28px;">DREGON vs TIGER</h1>
+    <p style="font-size: 11px; color: #888;">Enter 5+ Rounds for Multi-Layer Analysis</p>
+
+    <div id="prediction">ENTRY KARO</div>
+    <div class="logic-label" id="logicDesc">Waiting for valid data...</div>
+
+    <input type="text" id="aiEngine" placeholder="DDTDTDT..." oninput="runZeroxAI()" maxlength="40">
+
+    <div class="stats-grid">
+        <div class="stat-item"><span id="streakTitle">STREAK</span><b id="s_streak">0</b></div>
+        <div class="stat-item"><span>TREND</span><b id="s_trend" style="font-size:11px;">NONE</b></div>
+        <div class="stat-item"><span>PROBABILITY</span><b id="s_prob">0%</b></div>
     </div>
-    
-    </div>
+</div>
 
 <script>
-    // Ye function ek baar mein sara data load kar dega
-    function importData() {
-        let val = document.getElementById('bulkInput').value.toUpperCase();
-        if(!val) return;
-        
-        // String ko array mein badalna (DDT -> ['D','D','T'])
-        history = val.split('').filter(char => char === 'D' || char === 'T');
-        
-        // Agar 40 se zyada hai toh sirf last 40 rakhega
-        if(history.length > 40) history = history.slice(-40);
-        
-        updateUI();
-        predict();
-        document.getElementById('bulkInput').value = ""; // Clear input
-        alert("Data Imported! Ab prediction taiyar hai.");
-    }
+function runZeroxAI() {
+    let input = document.getElementById('aiEngine').value.toUpperCase().replace(/[^DT]/g, "");
+    document.getElementById('aiEngine').value = input; // Auto-correction
     
-    // Baki logic wahi purana...
+    let display = document.getElementById('prediction');
+    let logicMsg = document.getElementById('logicDesc');
+    let trendDisp = document.getElementById('s_trend');
+
+    if (input.length < 3) {
+        display.innerText = "ENTRY KARO";
+        display.className = "";
+        return;
+    }
+
+    let last = input[input.length - 1];
+    let secondLast = input[input.length - 2];
+    let thirdLast = input[input.length - 3];
+    
+    let pred = "";
+    let reason = "";
+    let confidence = 0;
+
+    // 1. Streak Detection (IMG 1/8 Logic)
+    let streak = 0;
+    for(let i = input.length-1; i>=0; i--) {
+        if(input[i] === last) streak++; else break;
+    }
+
+    // MAIN BRAIN LOGIC
+    if (streak >= 3) {
+        pred = last; 
+        reason = "TREND FOLLOW: Don't Break The Streak";
+        trendDisp.innerText = "LONG ROAD";
+        confidence = 70 + (streak * 5);
+    } 
+    else if (last !== secondLast && secondLast !== thirdLast) {
+        pred = (last === 'D' ? 'T' : 'D');
+        reason = "ZIG-ZAG: Pattern Alternating";
+        trendDisp.innerText = "1-1 PATTERN";
+        confidence = 82;
+    }
+    else if (last === secondLast && thirdLast !== last) {
+        pred = (last === 'D' ? 'D' : 'T');
+        reason = "DOUBLE: Repeating Pairs";
+        trendDisp.innerText = "2-2 PATTERN";
+        confidence = 75;
+    }
+    else {
+        pred = (last === 'D' ? 'T' : 'D');
+        reason = "SHIFT: Liquidity Balance Logic";
+        trendDisp.innerText = "SWITCHING";
+        confidence = 60;
+    }
+
+    // UI UPDATES
+    display.innerText = (pred === 'D' ? "DRAGON" : "TIGER");
+    display.className = (pred === 'D' ? "dragon-text" : "tiger-text");
+    logicMsg.innerText = "LOGIC: " + reason;
+    document.getElementById('s_streak').innerText = streak;
+    document.getElementById('s_prob').innerText = Math.min(confidence, 99) + "%";
+}
 </script>
+
+</body>
+</html>
