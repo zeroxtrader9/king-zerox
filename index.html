@@ -1,115 +1,36 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZEROX AI - Dragon Vs Tiger Analyzer</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a1a; color: white; text-align: center; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: #2d2d2d; padding: 20px; border-radius: 15px; border: 2px solid #f1c40f; box-shadow: 0 0 20px rgba(241, 196, 15, 0.2); }
-        h1 { color: #f1c40f; text-transform: uppercase; }
-        .input-section { margin: 20px 0; }
-        button { padding: 12px 25px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        .btn-dragon { background-color: #e74c3c; color: white; }
-        .btn-tiger { background-color: #3498db; color: white; }
-        .btn-reset { background-color: #95a5a6; color: black; }
-        .prediction-box { margin-top: 30px; padding: 20px; border: 2px dashed #f1c40f; border-radius: 10px; }
-        #nextPredict { font-size: 24px; font-weight: bold; color: #2ecc71; }
-        .history { margin-top: 20px; word-wrap: break-word; color: #bdc3c7; }
-        .stats { font-size: 14px; margin-top: 10px; color: #f1c40f; }
-    </style>
-</head>
-<body>
-
 <div class="container">
     <h1>🐲 ZEROX AI 🐯</h1>
-    <p>Pattern Analysis System (40 Rounds Logic)</p>
+    
+    <div style="margin-bottom: 20px;">
+        <input type="text" id="bulkInput" placeholder="Sari history paste karein (e.g. DDTDT)" 
+               style="width: 80%; padding: 10px; border-radius: 5px; border: none;">
+        <button onclick="importData()" style="background: #2ecc71; color: white;">IMPORT</button>
+    </div>
 
     <div class="input-section">
-        <p>Current Round Result Daalein:</p>
-        <button class="btn-dragon" onclick="addResult('D')">DRAGON (D)</button>
-        <button class="btn-tiger" onclick="addResult('T')">TIGER (T)</button>
-        <br><br>
-        <button class="btn-reset" onclick="resetData()">RESET DATA</button>
+        <button class="btn-dragon" onclick="addResult('D')">D</button>
+        <button class="btn-tiger" onclick="addResult('T')">T</button>
     </div>
-
-    <div class="prediction-box">
-        <div>AGLA PREDICTION:</div>
-        <div id="nextPredict">WAIT FOR DATA...</div>
-        <div id="logicReason" style="font-size: 12px; margin-top: 5px; color: #aaa;"></div>
-    </div>
-
-    <div class="stats" id="statsInfo">Rounds: 0 | D: 0% | T: 0%</div>
     
-    <div class="history">
-        <strong>History (Last 40):</strong>
-        <div id="historyList">-</div>
     </div>
-</div>
 
 <script>
-    let history = [];
-
-    function addResult(res) {
-        if (history.length >= 40) history.shift(); // 40 rounds limit
-        history.push(res);
+    // Ye function ek baar mein sara data load kar dega
+    function importData() {
+        let val = document.getElementById('bulkInput').value.toUpperCase();
+        if(!val) return;
+        
+        // String ko array mein badalna (DDT -> ['D','D','T'])
+        history = val.split('').filter(char => char === 'D' || char === 'T');
+        
+        // Agar 40 se zyada hai toh sirf last 40 rakhega
+        if(history.length > 40) history = history.slice(-40);
+        
         updateUI();
         predict();
+        document.getElementById('bulkInput').value = ""; // Clear input
+        alert("Data Imported! Ab prediction taiyar hai.");
     }
-
-    function resetData() {
-        history = [];
-        updateUI();
-        document.getElementById('nextPredict').innerText = "WAIT FOR DATA...";
-        document.getElementById('logicReason').innerText = "";
-    }
-
-    function updateUI() {
-        document.getElementById('historyList').innerText = history.join(" -> ");
-        let dCount = history.filter(x => x === 'D').length;
-        let tCount = history.filter(x => x === 'T').length;
-        let dPerc = history.length ? Math.round((dCount / history.length) * 100) : 0;
-        let tPerc = history.length ? Math.round((tCount / history.length) * 100) : 0;
-        document.getElementById('statsInfo').innerText = `Rounds: ${history.length} | Dragon: ${dPerc}% | Tiger: ${tPerc}%`;
-    }
-
-    function predict() {
-        if (history.length < 3) {
-            document.getElementById('nextPredict').innerText = "NEED MORE DATA";
-            return;
-        }
-
-        let last = history[history.length - 1];
-        let secondLast = history[history.length - 2];
-        let thirdLast = history[history.length - 3];
-        
-        let prediction = "";
-        let reason = "";
-
-        // 1. Long Streak Logic (Dragon/Tiger Road)
-        if (last === secondLast && last === thirdLast) {
-            prediction = last; 
-            reason = "Trend Follow: Long streak detected.";
-        } 
-        // 2. Zig-Zag Logic (D-T-D)
-        else if (last !== secondLast && secondLast === thirdLast) {
-            prediction = (last === 'D') ? 'T' : 'D';
-            reason = "Zig-Zag Pattern: Switching detected.";
-        }
-        // 3. Double-Double Logic (D-D-T-T)
-        else if (last === secondLast && thirdLast !== last) {
-            prediction = (last === 'D') ? 'D' : 'T';
-            reason = "Double-Double: Repeating pair.";
-        }
-        else {
-            prediction = (last === 'D') ? 'T' : 'D';
-            reason = "Probability Shift: Based on previous round.";
-        }
-
-        document.getElementById('nextPredict').innerText = (prediction === 'D' ? "🐲 DRAGON" : "🐯 TIGER");
-        document.getElementById('logicReason').innerText = "Logic: " + reason;
-    }
+    
+    // Baki logic wahi purana...
 </script>
-
-</body>
-</html>
